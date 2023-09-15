@@ -11,7 +11,10 @@ import com.github.quillraven.fleks.World
 import com.github.quillraven.fleks.configureWorld
 import ktx.app.KtxScreen
 import ktx.log.logger
+import se.simpor.component.AnimationComponent
+import se.simpor.component.AnimationType
 import se.simpor.component.ImageComponent
+import se.simpor.system.AnimationSystem
 import se.simpor.system.RenderSystem
 
 class GameScreen : KtxScreen {
@@ -22,9 +25,11 @@ class GameScreen : KtxScreen {
     private val world: World = configureWorld(entityCapacity = 1000) {
         injectables {
             add(stage)
+            add(textureAtlas)
         }
         systems {
             add(RenderSystem(stage))
+            add(AnimationSystem(textureAtlas))
         }
 
         onAddEntity { entity ->
@@ -48,7 +53,7 @@ class GameScreen : KtxScreen {
 
         world.entity {
             it += ImageComponent().apply {
-                image = Image(TextureRegion(textureAtlas.findRegion("player/idle"), 0, 0, 48, 48)).apply {
+                image = Image().apply {
                     setPosition(1f, 1f)
                     setSize(1f, 1f)
                     setScaling(Scaling.fill)
@@ -57,11 +62,27 @@ class GameScreen : KtxScreen {
         }
         world.entity {
             it += ImageComponent().apply {
-                image = Image(TextureRegion(textureAtlas.findRegion("slime/idle"), 0, 0, 32, 32)).apply {
+                image = Image().apply {
                     setPosition(1f, 2f)
                     setSize(2f, 1f)
                     setScaling(Scaling.fill)
                 }
+            }
+            it += AnimationComponent().apply {
+                nextAnimation("player", AnimationType.IDLE)
+            }
+
+        }
+        world.entity {
+            it += ImageComponent().apply {
+                image = Image().apply {
+                    setPosition(5f, 2f)
+                    setSize(2f, 1f)
+                    setScaling(Scaling.fill)
+                }
+            }
+            it += AnimationComponent().apply {
+                nextAnimation("slime", AnimationType.IDLE)
             }
 
         }
