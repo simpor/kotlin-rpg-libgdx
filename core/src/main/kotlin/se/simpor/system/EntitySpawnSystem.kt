@@ -11,6 +11,7 @@ import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World
 import com.github.quillraven.fleks.World.Companion.inject
 import ktx.app.gdxError
+import ktx.log.logger
 import ktx.math.vec2
 import ktx.tiled.layer
 import ktx.tiled.type
@@ -19,15 +20,21 @@ import ktx.tiled.y
 import se.simpor.MysticWoodGame.Companion.UNIT_SCALE
 import se.simpor.component.*
 import se.simpor.event.MapChangedEvent
+import se.simpor.screen.GameScreen
 
 class EntitySpawnSystem(
     private val atlas: TextureAtlas = inject()
 ) : IteratingSystem(
-    World.family { all(SpawnComponent) }
+    World.family { all(SpawnComponent) },
+    enabled = true
 ), EventListener {
 
     private val cachedConfigs = mutableMapOf<String, SpawnConfig>()
     private val cachedSize = mutableMapOf<AnimationModel, Vector2>()
+
+    companion object {
+        private val log = logger<GameScreen>()
+    }
 
     private fun spawnConfig(type: String) = cachedConfigs.getOrPut(type) {
         when (type.uppercase()) {
@@ -47,18 +54,37 @@ class EntitySpawnSystem(
     }
 
     override fun handle(event: Event): Boolean {
+        log.info { "Spawning entities defined in map" }
         when (event) {
             is MapChangedEvent -> {
 
                 val entityLayer = event.map.layer("entities")
                 entityLayer.objects.forEach { mapObject ->
                     val type = mapObject.name ?: gdxError("Mapobject ${mapObject.type} does not have a type")
-                    world.entity {
-                        it += SpawnComponent().apply {
-                            this.type = type
-                            this.location.set(mapObject.x * UNIT_SCALE, mapObject.y * UNIT_SCALE)
+                    log.info { "Spawning $type" }
+                    val spawnComponent = SpawnComponent().apply {
+                        this.type = type
+                        this.location.set(mapObject.x * UNIT_SCALE, mapObject.y * UNIT_SCALE)
+                    }
+                    world.entity { it += spawnComponent }
+                    with(spawnComponent) {
+                        val config = spawnConfig(this.type)
+                        val relativeSize = size(config.model)
+                        world.entity {
+                            log.info {"Spawning an entity: ${config.model}"}
+                            it += ImageComponent().apply {
+                                image = Image().apply {
+                                    setPosition(location.x, location.y)
+                                    setSize(relativeSize.x, relativeSize.y)
+                                    setScaling(com.badlogic.gdx.utils.Scaling.fill)
+                                }
+                            }
+                            it += AnimationComponent().apply {
+                                nextAnimation(config.model, se.simpor.component.AnimationType.IDLE)
+                            }
                         }
                     }
+
                 }
                 return true
             }
@@ -68,22 +94,6 @@ class EntitySpawnSystem(
     }
 
     override fun onTickEntity(entity: Entity) {
-        with(entity[SpawnComponent]) {
-            val config = spawnConfig(this.type)
-            val relativeSize = size(config.model)
-            world.entity {
-                it += ImageComponent().apply {
-                    image = Image().apply {
-                        setPosition(location.x, location.y)
-                        setSize(relativeSize.x, relativeSize.y)
-                        setScaling(Scaling.fill)
-                    }
-                }
-                it += AnimationComponent().apply {
-                    nextAnimation(config.model, AnimationType.IDLE)
-                }
-            }
-            config
-        }
+
     }
 }
