@@ -6,15 +6,16 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World
+import com.github.quillraven.fleks.World.Companion.inject
 import ktx.app.gdxError
-import ktx.log.logger
 import ktx.collections.map
+import ktx.log.logger
 import se.simpor.component.AnimationComponent
 import se.simpor.component.AnimationComponent.Companion.NO_ANIMATION
 import se.simpor.component.ImageComponent
 
 class AnimationSystem(
-    private val textureAtlas: TextureAtlas,
+    private val textureAtlas: TextureAtlas = inject(),
 ) : IteratingSystem(
     World.family { all(ImageComponent, AnimationComponent) },
 ) {
@@ -24,7 +25,6 @@ class AnimationSystem(
 
         if (animationComponent.nextAnimation == NO_ANIMATION) {
             animationComponent.stateTime += deltaTime
-
         } else {
             animationComponent.animation = animation(animationComponent.nextAnimation)
             animationComponent.stateTime = 0f
@@ -32,8 +32,7 @@ class AnimationSystem(
         }
 
         animationComponent.animation.playMode = animationComponent.playMode
-        val frame = animationComponent.animation.getKeyFrame(animationComponent.stateTime)
-        entity[ImageComponent].image.drawable = frame
+        entity[ImageComponent].image.drawable = animationComponent.animation.getKeyFrame(animationComponent.stateTime)
     }
 
     private fun animation(keyPath: String): Animation<TextureRegionDrawable> {
@@ -50,7 +49,7 @@ class AnimationSystem(
 
     companion object {
         private val log = logger<AnimationSystem>()
-        private const val DEFAULT_FRAME_DURATION = 1 / 8f
+        private const val DEFAULT_FRAME_DURATION = 1/8f
 
     }
 

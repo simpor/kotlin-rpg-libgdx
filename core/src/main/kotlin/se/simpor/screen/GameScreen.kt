@@ -3,6 +3,7 @@ package se.simpor.screen
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.maps.tiled.TmxMapLoader
 import com.badlogic.gdx.scenes.scene2d.EventListener
 import com.badlogic.gdx.scenes.scene2d.Stage
@@ -20,21 +21,23 @@ import se.simpor.component.ImageComponent
 import se.simpor.event.MapChangedEvent
 import se.simpor.event.fire
 import se.simpor.system.AnimationSystem
+import se.simpor.system.EntitySpawnSystem
 import se.simpor.system.RenderSystem
 
 class GameScreen : KtxScreen {
     private val stage = Stage(ExtendViewport(16f, 9f))
     private val textureAtlas = TextureAtlas("assets/graphics/characters.atlas")
+    private lateinit var currentMap: TiledMap
 
-    //    private val texture = Texture("assets/graphics/characters.png")
     private val world: World = configureWorld(entityCapacity = 1000) {
         injectables {
             add(stage)
             add(textureAtlas)
         }
         systems {
-            add(RenderSystem(stage))
-            add(AnimationSystem(textureAtlas))
+            add(RenderSystem())
+            add(AnimationSystem())
+            add(EntitySpawnSystem())
         }
 
         onAddEntity { entity ->
@@ -51,50 +54,14 @@ class GameScreen : KtxScreen {
 
     }
 
+
     override fun show() {
         log.debug { "GameScreen get shown" }
 
         world.systems.forEach { system -> if (system is EventListener) stage.addListener(system) }
 
-        val tiledMap = TmxMapLoader().load("maps/demo2.tmx")
-        stage.fire(MapChangedEvent(tiledMap))
-
-        world.entity {
-            it += ImageComponent().apply {
-                image = Image().apply {
-                    setPosition(1f, 1f)
-                    setSize(1f, 1f)
-                    setScaling(Scaling.fill)
-                }
-            }
-        }
-        world.entity {
-            it += ImageComponent().apply {
-                image = Image().apply {
-                    setPosition(1f, 2f)
-                    setSize(2f, 1f)
-                    setScaling(Scaling.fill)
-                }
-            }
-            it += AnimationComponent().apply {
-                nextAnimation(AnimationModel.PLAYER, AnimationType.IDLE)
-            }
-
-        }
-        world.entity {
-            it += ImageComponent().apply {
-                image = Image().apply {
-                    setPosition(5f, 2f)
-                    setSize(2f, 1f)
-                    setScaling(Scaling.fill)
-                }
-            }
-            it += AnimationComponent().apply {
-                nextAnimation(AnimationModel.SLIME, AnimationType.IDLE)
-            }
-
-        }
-
+        currentMap = TmxMapLoader().load("maps/demo2.tmx")
+        stage.fire(MapChangedEvent(currentMap))
     }
 
     override fun resize(width: Int, height: Int) {
@@ -111,6 +78,7 @@ class GameScreen : KtxScreen {
         stage.dispose()
         textureAtlas.dispose()
         world.dispose()
+        currentMap.dispose()
     }
 
     companion object {

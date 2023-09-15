@@ -7,11 +7,10 @@ import com.badlogic.gdx.maps.tiled.tiles.AnimatedTiledMapTile
 import com.badlogic.gdx.scenes.scene2d.Event
 import com.badlogic.gdx.scenes.scene2d.EventListener
 import com.badlogic.gdx.scenes.scene2d.Stage
-import com.github.quillraven.fleks.*
-import com.github.quillraven.fleks.Family
+import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
-import com.github.quillraven.fleks.collection.compareEntity
+import com.github.quillraven.fleks.World.Companion.inject
 import com.github.quillraven.fleks.collection.compareEntityBy
 import ktx.graphics.use
 import ktx.tiled.forEachLayer
@@ -19,7 +18,7 @@ import se.simpor.component.ImageComponent
 import se.simpor.event.MapChangedEvent
 
 class RenderSystem(
-    private val stage: Stage
+    private val stage: Stage = inject()
 ) : IteratingSystem(
     family { all(ImageComponent) },
     comparator = compareEntityBy(ImageComponent)
