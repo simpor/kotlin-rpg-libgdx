@@ -12,6 +12,7 @@ import com.github.quillraven.fleks.configureWorld
 import ktx.app.KtxScreen
 import ktx.log.logger
 import se.simpor.component.AnimationComponent
+import se.simpor.component.AnimationModel
 import se.simpor.component.AnimationType
 import se.simpor.component.ImageComponent
 import se.simpor.system.AnimationSystem
@@ -69,7 +70,7 @@ class GameScreen : KtxScreen {
                 }
             }
             it += AnimationComponent().apply {
-                nextAnimation("player", AnimationType.IDLE)
+                nextAnimation(AnimationModel.PLAYER, AnimationType.IDLE)
             }
 
         }
@@ -82,7 +83,7 @@ class GameScreen : KtxScreen {
                 }
             }
             it += AnimationComponent().apply {
-                nextAnimation("slime", AnimationType.IDLE)
+                nextAnimation(AnimationModel.SLIME, AnimationType.IDLE)
             }
 
         }

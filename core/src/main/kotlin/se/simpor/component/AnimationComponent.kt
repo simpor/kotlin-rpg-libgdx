@@ -13,8 +13,13 @@ enum class AnimationType {
     val atlasKey = this.toString().lowercase()
 }
 
+enum class AnimationModel {
+    PLAYER, SLIME, CHEST, UNDEFINED;
+    val atlasKey = this.toString().lowercase()
+}
+
 class AnimationComponent(
-    var atlasKey: String = "",
+    var model: AnimationModel = AnimationModel.UNDEFINED,
     var stateTime: Float = 0f,
     var playMode: Animation.PlayMode = Animation.PlayMode.LOOP
 
@@ -27,9 +32,9 @@ class AnimationComponent(
 
 
 
-    fun nextAnimation(atlasKey: String, type: AnimationType) {
-        this.atlasKey = atlasKey
-        nextAnimation = "$atlasKey/${type.atlasKey}"
+    fun nextAnimation(model:AnimationModel, type: AnimationType) {
+        this.model = model
+        nextAnimation = "${model.atlasKey}/${type.atlasKey}"
     }
 
     override fun type(): ComponentType<AnimationComponent> = AnimationComponent
