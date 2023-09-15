@@ -3,6 +3,8 @@ package se.simpor.screen
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.maps.tiled.TmxMapLoader
+import com.badlogic.gdx.scenes.scene2d.EventListener
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.utils.Scaling
@@ -15,6 +17,8 @@ import se.simpor.component.AnimationComponent
 import se.simpor.component.AnimationModel
 import se.simpor.component.AnimationType
 import se.simpor.component.ImageComponent
+import se.simpor.event.MapChangedEvent
+import se.simpor.event.fire
 import se.simpor.system.AnimationSystem
 import se.simpor.system.RenderSystem
 
@@ -37,20 +41,23 @@ class GameScreen : KtxScreen {
             if (entity has ImageComponent) {
                 stage.addActor(entity[ImageComponent].image)
             }
-
         }
 
         onRemoveEntity { entity ->
             if (entity has ImageComponent) {
                 stage.root.removeActor(entity[ImageComponent].image)
             }
-
         }
 
     }
 
     override fun show() {
         log.debug { "GameScreen get shown" }
+
+        world.systems.forEach { system -> if (system is EventListener) stage.addListener(system) }
+
+        val tiledMap = TmxMapLoader().load("maps/demo2.tmx")
+        stage.fire(MapChangedEvent(tiledMap))
 
         world.entity {
             it += ImageComponent().apply {
@@ -92,7 +99,7 @@ class GameScreen : KtxScreen {
 
     override fun resize(width: Int, height: Int) {
         with(stage) {
-            stage.viewport.update(width, height, true)
+            viewport.update(width, height, true)
         }
     }
 
