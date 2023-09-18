@@ -15,6 +15,8 @@ import com.badlogic.gdx.physics.box2d.World as PhysicWorld
 class PhysicComponent : Component<PhysicComponent> {
     val impulse: Vector2 = vec2()
     lateinit var body: Body
+    val prevPos = vec2()
+
 
     override fun type() = PhysicComponent
     override fun World.onAdd(entity: Entity) {

@@ -36,6 +36,7 @@ class GameScreen : KtxScreen {
             add(EntitySpawnSystem(textureAtlas, physicWorld))
             add(MoveSystem())
             add(PhysicSystem(physicWorld))
+            add(CameraSystem(stage))
             add(AnimationSystem())
             add(RenderSystem())
             add(DebugSystem(physicWorld, stage))

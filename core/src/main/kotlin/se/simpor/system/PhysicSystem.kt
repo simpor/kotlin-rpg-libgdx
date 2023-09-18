@@ -1,5 +1,6 @@
 package se.simpor.system
 
+import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.scenes.scene2d.Event
 import com.badlogic.gdx.scenes.scene2d.EventListener
@@ -10,6 +11,8 @@ import com.github.quillraven.fleks.World.Companion.family
 import com.github.quillraven.fleks.collection.compareEntityBy
 import ktx.app.gdxError
 import ktx.log.logger
+import ktx.math.component1
+import ktx.math.component2
 import se.simpor.component.ImageComponent
 import se.simpor.component.PhysicComponent
 
@@ -42,6 +45,7 @@ class PhysicSystem(
         val physicComponent = entity[PhysicComponent]
         val imageComponent = entity[ImageComponent]
         val position = physicComponent.body.position
+        physicComponent.prevPos.set(physicComponent.body.position)
 
         if (!physicComponent.impulse.isZero) {
             log.info { "Moving due to impulse: ${physicComponent.impulse.x}, ${physicComponent.impulse.y}" }
@@ -49,12 +53,22 @@ class PhysicSystem(
             physicComponent.impulse.setZero()
         }
 
-        imageComponent.image.run {
-            val newX = position.x - width * 0.5f
-            val newY = position.y - height * 0.5f
-            setPosition(newX, newY)
+      //  entity[ImageComponent].image.toFront()
+    }
+
+    override fun onAlphaEntity(entity: Entity, alpha: Float) {
+        val imageCmp = entity[ImageComponent]
+        val physicComponent = entity[PhysicComponent]
+
+        imageCmp.image.run {
+            val (prevX, prevY) = physicComponent.prevPos
+            val (bodyX, bodyY) = physicComponent.body.position
+
+            setPosition(
+                MathUtils.lerp(prevX, bodyX, alpha) - width * 0.5f,
+                MathUtils.lerp(prevY, bodyY, alpha) - height * 0.5f
+            )
         }
-        entity[ImageComponent].image.toFront()
     }
 
     override fun handle(event: Event?): Boolean {
