@@ -1,5 +1,6 @@
 package se.simpor.component
 
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.scenes.scene2d.ui.Image
@@ -8,9 +9,11 @@ import com.github.quillraven.fleks.ComponentType
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
 import ktx.box2d.body
+import ktx.math.vec2
 import com.badlogic.gdx.physics.box2d.World as PhysicWorld
 
 class PhysicComponent : Component<PhysicComponent> {
+    val impulse: Vector2 = vec2()
     lateinit var body: Body
 
     override fun type() = PhysicComponent

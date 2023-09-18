@@ -21,13 +21,13 @@ class PhysicSystem(
     interval = Fixed(1 / 60f)
 ), EventListener {
     companion object {
-        private val log = logger<EntitySpawnSystem>()
+        private val log = logger<PhysicSystem>()
     }
 
     override fun onUpdate() {
         if (physicWorld.autoClearForces) {
-            gdxError("Setting autoClearForces to false")
             physicWorld.autoClearForces = false
+            gdxError("Setting autoClearForces to false")
         }
         super.onUpdate()
         physicWorld.clearForces()
@@ -42,8 +42,17 @@ class PhysicSystem(
         val physicComponent = entity[PhysicComponent]
         val imageComponent = entity[ImageComponent]
         val position = physicComponent.body.position
+
+        if (!physicComponent.impulse.isZero) {
+            log.info { "Moving due to impulse: ${physicComponent.impulse.x}, ${physicComponent.impulse.y}" }
+            physicComponent.body.applyLinearImpulse(physicComponent.impulse, physicComponent.body.worldCenter, true)
+            physicComponent.impulse.setZero()
+        }
+
         imageComponent.image.run {
-            setPosition(x - width * 0.5f, position.y - height * 0.5f)
+            val newX = position.x - width * 0.5f
+            val newY = position.y - height * 0.5f
+            setPosition(newX, newY)
         }
         entity[ImageComponent].image.toFront()
     }

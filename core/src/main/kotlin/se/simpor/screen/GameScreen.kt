@@ -15,6 +15,7 @@ import ktx.math.vec2
 import se.simpor.component.ImageComponent
 import se.simpor.event.MapChangedEvent
 import se.simpor.event.fire
+import se.simpor.input.PlayerKeyboardInputProcessor
 import se.simpor.system.*
 
 class GameScreen : KtxScreen {
@@ -33,6 +34,7 @@ class GameScreen : KtxScreen {
         }
         systems {
             add(EntitySpawnSystem(textureAtlas, physicWorld))
+            add(MoveSystem())
             add(PhysicSystem(physicWorld))
             add(AnimationSystem())
             add(RenderSystem())
@@ -61,6 +63,8 @@ class GameScreen : KtxScreen {
 
         currentMap = TmxMapLoader().load("maps/demo2.tmx")
         stage.fire(MapChangedEvent(currentMap))
+
+       PlayerKeyboardInputProcessor(world = entityWorld)
     }
 
     override fun resize(width: Int, height: Int) {

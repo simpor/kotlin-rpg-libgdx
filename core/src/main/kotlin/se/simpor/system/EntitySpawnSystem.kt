@@ -18,6 +18,7 @@ import ktx.tiled.y
 import se.simpor.MysticWoodGame
 import se.simpor.MysticWoodGame.Companion.UNIT_SCALE
 import se.simpor.component.*
+import se.simpor.component.SpawnConfig.Companion.DEFAULT_SPEED
 import se.simpor.event.MapChangedEvent
 import com.badlogic.gdx.physics.box2d.World as PhysicWorld
 
@@ -102,8 +103,17 @@ class EntitySpawnSystem(
                         BodyDef.BodyType.DynamicBody
                     )
                 }
+                val scaleSpeed = spawnConfig(type).scaleSpeed
+                if (scaleSpeed > 0) {
+                    it += MoveComponent().apply {
+                        speed = DEFAULT_SPEED * scaleSpeed
+                    }
+                }
+                if (type == "PLAYER") {
+                    it += PlayerComponent()
+                }
             }
         }
-        entity.remove()
+        entity.remove() // removing the entity so we dont try and spawn it again
     }
 }
