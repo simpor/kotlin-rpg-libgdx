@@ -23,6 +23,7 @@ class PhysicSystem(
     companion object {
         private val log = logger<EntitySpawnSystem>()
     }
+
     override fun onUpdate() {
         if (physicWorld.autoClearForces) {
             gdxError("Setting autoClearForces to false")
@@ -42,7 +43,7 @@ class PhysicSystem(
         val imageComponent = entity[ImageComponent]
         val position = physicComponent.body.position
         imageComponent.image.run {
-            setPosition(position.x - width * 0.5f, position.y - height * 0.5f)
+            setPosition(x - width * 0.5f, position.y - height * 0.5f)
         }
         entity[ImageComponent].image.toFront()
     }
