@@ -70,7 +70,14 @@ class EntitySpawnSystem(
                 scaleSpeed = 0f
             )
 
-            else -> gdxError("Type $type does not have a SpawnConfig")
+            else -> {
+                log.error { "Type $type does not have a SpawnConfig"}
+                SpawnConfig(
+                    AnimationModel.CHEST,
+                    bodyType = BodyDef.BodyType.StaticBody,
+                    scaleSpeed = 0f
+                )
+            }
         }
     }
 
@@ -98,9 +105,9 @@ class EntitySpawnSystem(
     }
 
     override fun onTickEntity(entity: Entity) {
-
         with(entity[SpawnComponent]) {
             world.entity {
+                val spawnConfig = spawnConfig(type)
                 log.info { "Spawning an entity: $animationModel" }
                 it += ImageComponent().apply {
                     image = Image().apply {
@@ -116,10 +123,17 @@ class EntitySpawnSystem(
                     body = PhysicComponent.createPhysicBody(
                         physicWorld,
                         it[ImageComponent].image,
-                        spawnConfig(type)
+                        spawnConfig
                     )
                 }
-                val scaleSpeed = spawnConfig(type).scaleSpeed
+
+                if (spawnConfig.bodyType != BodyDef.BodyType.StaticBody) {
+                    // entity is not static -> add collision component to spawn
+                    // collision entities around it
+                    it += CollisionComponent()
+                }
+
+                val scaleSpeed = spawnConfig.scaleSpeed
                 if (scaleSpeed > 0) {
                     it += MoveComponent().apply {
                         speed = DEFAULT_SPEED * scaleSpeed

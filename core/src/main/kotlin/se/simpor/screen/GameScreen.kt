@@ -33,6 +33,7 @@ class GameScreen : KtxScreen {
             add(physicWorld)
         }
         systems {
+            add(CollisionSpawnSystem(physicWorld))
             add(EntitySpawnSystem(textureAtlas, physicWorld))
             add(MoveSystem())
             add(PhysicSystem(physicWorld))
@@ -62,7 +63,7 @@ class GameScreen : KtxScreen {
 
         entityWorld.systems.forEach { system -> if (system is EventListener) stage.addListener(system) }
 
-        currentMap = TmxMapLoader().load("maps/demo2.tmx")
+        currentMap = TmxMapLoader().load("maps/demo.tmx")
         stage.fire(MapChangedEvent(currentMap))
 
        PlayerKeyboardInputProcessor(world = entityWorld)
