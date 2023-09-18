@@ -9,28 +9,34 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.github.quillraven.fleks.World
 import com.github.quillraven.fleks.configureWorld
 import ktx.app.KtxScreen
+import ktx.box2d.createWorld
 import ktx.log.logger
+import ktx.math.vec2
 import se.simpor.component.ImageComponent
 import se.simpor.event.MapChangedEvent
 import se.simpor.event.fire
-import se.simpor.system.AnimationSystem
-import se.simpor.system.EntitySpawnSystem
-import se.simpor.system.RenderSystem
+import se.simpor.system.*
 
 class GameScreen : KtxScreen {
     private val stage = Stage(ExtendViewport(16f, 9f))
     private val textureAtlas = TextureAtlas("assets/graphics/characters.atlas")
     private lateinit var currentMap: TiledMap
+    private val physicWorld = createWorld(gravity = vec2()).apply {
+        autoClearForces = false
+    }
 
-    private val world: World = configureWorld(entityCapacity = 1000) {
+    private val entityWorld: World = configureWorld(entityCapacity = 1000) {
         injectables {
             add(stage)
             add(textureAtlas)
+            add(physicWorld)
         }
         systems {
             add(RenderSystem())
             add(AnimationSystem())
             add(EntitySpawnSystem())
+            add(PhysicSystem(physicWorld))
+            add(DebugSystem(physicWorld, stage))
         }
 
         onAddEntity { entity ->
@@ -51,7 +57,7 @@ class GameScreen : KtxScreen {
     override fun show() {
         log.debug { "GameScreen get shown" }
 
-        world.systems.forEach { system -> if (system is EventListener) stage.addListener(system) }
+        entityWorld.systems.forEach { system -> if (system is EventListener) stage.addListener(system) }
 
         currentMap = TmxMapLoader().load("maps/demo2.tmx")
         stage.fire(MapChangedEvent(currentMap))
@@ -64,13 +70,13 @@ class GameScreen : KtxScreen {
     }
 
     override fun render(delta: Float) {
-        world.update(delta)
+        entityWorld.update(delta.coerceAtMost(0.25f))
     }
 
     override fun dispose() {
         stage.dispose()
         textureAtlas.dispose()
-        world.dispose()
+        entityWorld.dispose()
         currentMap.dispose()
     }
 

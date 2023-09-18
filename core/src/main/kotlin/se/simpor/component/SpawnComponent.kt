@@ -1,6 +1,7 @@
 package se.simpor.component
 
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
@@ -41,6 +42,9 @@ data class SpawnComponent(
                 }
                 it += AnimationComponent().apply {
                     nextAnimation(animationModel, se.simpor.component.AnimationType.IDLE)
+                }
+                it += PhysicComponent().apply {
+                    body = PhysicComponent.createPhysicBody(physicWorld, it[ImageComponent].image, BodyDef.BodyType.DynamicBody)
                 }
             }
         }
