@@ -8,16 +8,19 @@ import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.github.quillraven.fleks.IntervalSystem
 import com.github.quillraven.fleks.World.Companion.inject
+import ktx.log.logger
 
 class DebugSystem(
     private val physicWorld: World,
     private val stage: Stage,
-) : IntervalSystem(enabled = false) {
+) : IntervalSystem(enabled = true) {
     private val physicRenderer by lazy { Box2DDebugRenderer() }
     private val profiler by lazy { GLProfiler(Gdx.graphics).apply { enable() } }
     private val shapeRenderer by lazy { ShapeRenderer() }
     private val camera = stage.camera
-
+    companion object {
+        private val log = logger<EntitySpawnSystem>()
+    }
     override fun onTick() {
         stage.isDebugAll = true
         Gdx.graphics.setTitle(

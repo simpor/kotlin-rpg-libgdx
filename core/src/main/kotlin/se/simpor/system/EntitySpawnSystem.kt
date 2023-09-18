@@ -2,12 +2,12 @@ package se.simpor.system
 
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.scenes.scene2d.Event
 import com.badlogic.gdx.scenes.scene2d.EventListener
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World
-import com.github.quillraven.fleks.World.Companion.inject
 import ktx.app.gdxError
 import ktx.log.logger
 import ktx.math.vec2
@@ -17,14 +17,13 @@ import ktx.tiled.x
 import ktx.tiled.y
 import se.simpor.MysticWoodGame
 import se.simpor.MysticWoodGame.Companion.UNIT_SCALE
-import se.simpor.component.AnimationModel
-import se.simpor.component.AnimationType
-import se.simpor.component.SpawnComponent
-import se.simpor.component.SpawnConfig
+import se.simpor.component.*
 import se.simpor.event.MapChangedEvent
+import com.badlogic.gdx.physics.box2d.World as PhysicWorld
 
 class EntitySpawnSystem(
-    private val atlas: TextureAtlas = inject()
+    private val atlas: TextureAtlas,
+    private val physicWorld: PhysicWorld
 ) : IteratingSystem(
     World.family { all(SpawnComponent) },
     enabled = true
@@ -83,5 +82,28 @@ class EntitySpawnSystem(
 
     override fun onTickEntity(entity: Entity) {
 
+        with(entity[SpawnComponent]) {
+            world.entity {
+                log.info { "Spawning an entity: $animationModel" }
+                it += ImageComponent().apply {
+                    image = com.badlogic.gdx.scenes.scene2d.ui.Image().apply {
+                        setPosition(location.x, location.y)
+                        setSize(relativeSize.x, relativeSize.y)
+                        setScaling(com.badlogic.gdx.utils.Scaling.fill)
+                    }
+                }
+                it += AnimationComponent().apply {
+                    nextAnimation(animationModel, AnimationType.IDLE)
+                }
+                it += PhysicComponent().apply {
+                    body = PhysicComponent.createPhysicBody(
+                        physicWorld,
+                        it[ImageComponent].image,
+                        BodyDef.BodyType.DynamicBody
+                    )
+                }
+            }
+        }
+        entity.remove()
     }
 }

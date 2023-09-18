@@ -32,10 +32,10 @@ class GameScreen : KtxScreen {
             add(physicWorld)
         }
         systems {
-            add(RenderSystem())
-            add(AnimationSystem())
-            add(EntitySpawnSystem())
+            add(EntitySpawnSystem(textureAtlas, physicWorld))
             add(PhysicSystem(physicWorld))
+            add(AnimationSystem())
+            add(RenderSystem())
             add(DebugSystem(physicWorld, stage))
         }
 

@@ -9,6 +9,7 @@ import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
 import com.github.quillraven.fleks.collection.compareEntityBy
 import ktx.app.gdxError
+import ktx.log.logger
 import se.simpor.component.ImageComponent
 import se.simpor.component.PhysicComponent
 
@@ -19,7 +20,9 @@ class PhysicSystem(
     comparator = compareEntityBy(ImageComponent),
     interval = Fixed(1 / 60f)
 ), EventListener {
-
+    companion object {
+        private val log = logger<EntitySpawnSystem>()
+    }
     override fun onUpdate() {
         if (physicWorld.autoClearForces) {
             gdxError("Setting autoClearForces to false")

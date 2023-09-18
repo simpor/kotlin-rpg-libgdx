@@ -21,32 +21,8 @@ data class SpawnComponent(
     var location: Vector2 = vec2()
 ) : Component<SpawnComponent> {
 
-    companion object : ComponentType<SpawnComponent>() {
-        private val log = logger<SpawnComponent>()
-
-    }
+    companion object : ComponentType<SpawnComponent>()
 
     override fun type(): ComponentType<SpawnComponent> = SpawnComponent
 
-
-    override fun World.onAdd(entity: Entity) {
-        with(entity[SpawnComponent]) {
-            entity {
-                log.info { "Spawning an entity: $animationModel" }
-                it += ImageComponent().apply {
-                    image = Image().apply {
-                        setPosition(location.x, location.y)
-                        setSize(relativeSize.x, relativeSize.y)
-                        setScaling(com.badlogic.gdx.utils.Scaling.fill)
-                    }
-                }
-                it += AnimationComponent().apply {
-                    nextAnimation(animationModel, se.simpor.component.AnimationType.IDLE)
-                }
-                it += PhysicComponent().apply {
-                    body = PhysicComponent.createPhysicBody(physicWorld, it[ImageComponent].image, BodyDef.BodyType.DynamicBody)
-                }
-            }
-        }
-    }
 }
