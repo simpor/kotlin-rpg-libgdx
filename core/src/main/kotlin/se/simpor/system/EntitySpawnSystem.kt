@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.scenes.scene2d.Event
 import com.badlogic.gdx.scenes.scene2d.EventListener
+import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World
@@ -51,9 +52,24 @@ class EntitySpawnSystem(
 
     private fun spawnConfig(type: String) = cachedConfigs.getOrPut(type) {
         when (type.uppercase()) {
-            "PLAYER" -> SpawnConfig(AnimationModel.PLAYER)
-            "SLIME" -> SpawnConfig(AnimationModel.SLIME)
-            "CHEST" -> SpawnConfig(AnimationModel.SLIME)
+            "PLAYER" -> SpawnConfig(
+                AnimationModel.PLAYER,
+                scalePhysic = vec2(0.3f, 0.3f),
+                physicOffset = vec2(0f, -10f * UNIT_SCALE)
+            )
+
+            "SLIME" -> SpawnConfig(
+                AnimationModel.SLIME,
+                scalePhysic = vec2(0.3f, 0.3f),
+                physicOffset = vec2(0f, -2f * UNIT_SCALE)
+            )
+
+            "CHEST" -> SpawnConfig(
+                AnimationModel.CHEST,
+                bodyType = BodyDef.BodyType.StaticBody,
+                scaleSpeed = 0f
+            )
+
             else -> gdxError("Type $type does not have a SpawnConfig")
         }
     }
@@ -87,7 +103,7 @@ class EntitySpawnSystem(
             world.entity {
                 log.info { "Spawning an entity: $animationModel" }
                 it += ImageComponent().apply {
-                    image = com.badlogic.gdx.scenes.scene2d.ui.Image().apply {
+                    image = Image().apply {
                         setPosition(location.x, location.y)
                         setSize(relativeSize.x, relativeSize.y)
                         setScaling(com.badlogic.gdx.utils.Scaling.fill)
@@ -100,7 +116,7 @@ class EntitySpawnSystem(
                     body = PhysicComponent.createPhysicBody(
                         physicWorld,
                         it[ImageComponent].image,
-                        BodyDef.BodyType.DynamicBody
+                        spawnConfig(type)
                     )
                 }
                 val scaleSpeed = spawnConfig(type).scaleSpeed

@@ -15,7 +15,7 @@ import se.simpor.component.MoveComponent
 import se.simpor.component.PhysicComponent
 
 class MoveSystem : IteratingSystem(
-    family { all(ImageComponent, PhysicComponent) },
+    family { all(MoveComponent, PhysicComponent) },
     comparator = compareEntityBy(ImageComponent),
     interval = Fixed(1 / 60f)
 ), EventListener {
@@ -24,26 +24,27 @@ class MoveSystem : IteratingSystem(
     }
 
     override fun onTickEntity(entity: Entity) {
-        val moveComponent = entity[MoveComponent]
         val physicComponent = entity[PhysicComponent]
-        val mass = physicComponent.body.mass
-        val (velX, velY) = physicComponent.body.linearVelocity
-        if ((moveComponent.cos == 0f && moveComponent.sin == 0f)) {
-            // no direction for movement or entity is rooted
-            if (!physicComponent.body.linearVelocity.isZero) {
-                // entity is moving -> stop it
-                val mass = physicComponent.body.mass
-                val (velX, velY) = physicComponent.body.linearVelocity
-                physicComponent.impulse.set(
-                    mass * (0f - velX),
-                    mass * (0f - velY)
-                )
+            val moveComponent = entity[MoveComponent]
+
+            val mass = physicComponent.body.mass
+            val (velX, velY) = physicComponent.body.linearVelocity
+            if ((moveComponent.cos == 0f && moveComponent.sin == 0f)) {
+                // no direction for movement or entity is rooted
+                if (!physicComponent.body.linearVelocity.isZero) {
+                    // entity is moving -> stop it
+                    val mass = physicComponent.body.mass
+                    val (velX, velY) = physicComponent.body.linearVelocity
+                    physicComponent.impulse.set(
+                        mass * (0f - velX),
+                        mass * (0f - velY)
+                    )
+                }
             }
-        }
-        physicComponent.impulse.set(
-            mass * (moveComponent.speed * moveComponent.cos - velX),
-            mass * (moveComponent.speed * moveComponent.sin - velY),
-        )
+            physicComponent.impulse.set(
+                mass * (moveComponent.speed * moveComponent.cos - velX),
+                mass * (moveComponent.speed * moveComponent.sin - velY),
+            )
     }
 
     override fun handle(event: Event?): Boolean {

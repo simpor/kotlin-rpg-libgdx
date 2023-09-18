@@ -20,7 +20,7 @@ import se.simpor.system.*
 
 class GameScreen : KtxScreen {
     private val stage = Stage(ExtendViewport(16f, 9f))
-    private val textureAtlas = TextureAtlas("assets/graphics/characters.atlas")
+    private val textureAtlas = TextureAtlas("assets/graphics/game.atlas")
     private lateinit var currentMap: TiledMap
     private val physicWorld = createWorld(gravity = vec2()).apply {
         autoClearForces = false

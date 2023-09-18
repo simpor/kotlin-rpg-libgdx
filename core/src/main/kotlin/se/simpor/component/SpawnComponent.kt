@@ -2,19 +2,18 @@ package se.simpor.component
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.BodyDef
-import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
-import com.github.quillraven.fleks.Entity
-import com.github.quillraven.fleks.World
-import ktx.log.logger
 import ktx.math.vec2
 
 data class SpawnConfig(
     val model: AnimationModel,
     val scaleSpeed: Float = 1f,
+    val scalePhysic: Vector2 = vec2(1f, 1f),
+    val physicOffset: Vector2 = vec2(0f, 0f),
+    val bodyType: BodyDef.BodyType = BodyDef.BodyType.DynamicBody,
 
-) {
+    ) {
     companion object {
         const val DEFAULT_SPEED = 2f
         const val DEFAULT_LIFE = 15

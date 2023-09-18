@@ -1,7 +1,7 @@
 package se.simpor.system
 
 import com.badlogic.gdx.math.MathUtils
-import com.badlogic.gdx.physics.box2d.World
+import com.badlogic.gdx.physics.box2d.*
 import com.badlogic.gdx.scenes.scene2d.Event
 import com.badlogic.gdx.scenes.scene2d.EventListener
 import com.github.quillraven.fleks.Entity
@@ -22,9 +22,13 @@ class PhysicSystem(
     family { all(ImageComponent, PhysicComponent) },
     comparator = compareEntityBy(ImageComponent),
     interval = Fixed(1 / 60f)
-), EventListener {
+), EventListener, ContactListener {
     companion object {
         private val log = logger<PhysicSystem>()
+    }
+
+    init {
+        physicWorld.setContactListener(this)
     }
 
     override fun onUpdate() {
@@ -53,7 +57,7 @@ class PhysicSystem(
             physicComponent.impulse.setZero()
         }
 
-      //  entity[ImageComponent].image.toFront()
+        //  entity[ImageComponent].image.toFront()
     }
 
     override fun onAlphaEntity(entity: Entity, alpha: Float) {
@@ -75,4 +79,20 @@ class PhysicSystem(
         return true
     }
 
+    override fun beginContact(contact: Contact?) {
+
+    }
+
+    override fun endContact(contact: Contact?) {
+
+    }
+
+    private fun Fixture.isDynamicBody() = this.body.type == BodyDef.BodyType.DynamicBody
+    private fun Fixture.isStaticBody() = this.body.type == BodyDef.BodyType.StaticBody
+    override fun preSolve(contact: Contact, oldManifold: Manifold) {
+        contact.isEnabled = (contact.fixtureA.isStaticBody() && contact.fixtureB.isDynamicBody()) ||
+            (contact.fixtureB.isStaticBody() && contact.fixtureA.isDynamicBody())
+    }
+
+    override fun postSolve(contact: Contact?, impulse: ContactImpulse?) = Unit
 }
