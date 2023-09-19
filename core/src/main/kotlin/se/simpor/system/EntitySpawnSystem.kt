@@ -5,7 +5,6 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.scenes.scene2d.Event
 import com.badlogic.gdx.scenes.scene2d.EventListener
-import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World
@@ -18,9 +17,14 @@ import ktx.tiled.x
 import ktx.tiled.y
 import se.simpor.MysticWoodGame
 import se.simpor.MysticWoodGame.Companion.UNIT_SCALE
+import se.simpor.actor.FlipImage
 import se.simpor.component.*
+import se.simpor.component.PhysicComponent.Companion.createPhysicBody
+import se.simpor.component.SpawnConfig.Companion.DEFAULT_ATTACK_DAMAGE
+import se.simpor.component.SpawnConfig.Companion.DEFAULT_LIFE
 import se.simpor.component.SpawnConfig.Companion.DEFAULT_SPEED
 import se.simpor.event.MapChangedEvent
+import kotlin.math.roundToInt
 import com.badlogic.gdx.physics.box2d.World as PhysicWorld
 
 class EntitySpawnSystem(
@@ -37,6 +41,9 @@ class EntitySpawnSystem(
 
     companion object {
         private val log = logger<EntitySpawnSystem>()
+
+        const val ACTION_SENSOR = "ActionSensor"
+        const val HIT_BOX_SENSOR = "HitBoxSensor"
     }
 
     private fun size(model: AnimationModel) = cachedSize.getOrPut(model) {
@@ -55,23 +62,29 @@ class EntitySpawnSystem(
             "PLAYER" -> SpawnConfig(
                 AnimationModel.PLAYER,
                 scalePhysic = vec2(0.3f, 0.3f),
-                physicOffset = vec2(0f, -10f * UNIT_SCALE)
+                physicOffset = vec2(0f, -10f * UNIT_SCALE),
+                scaleSpeed = 3f,
+                scaleAttackDamage = 1.25f,
+                attackExtraRange = 0.6f,
             )
 
             "SLIME" -> SpawnConfig(
                 AnimationModel.SLIME,
                 scalePhysic = vec2(0.3f, 0.3f),
+                lifeScale = 0.75f,
                 physicOffset = vec2(0f, -2f * UNIT_SCALE)
             )
 
             "CHEST" -> SpawnConfig(
                 AnimationModel.CHEST,
                 bodyType = BodyDef.BodyType.StaticBody,
-                scaleSpeed = 0f
+                scaleSpeed = 0f,
+                canAttack = false,
+                lifeScale = 0f,
             )
 
             else -> {
-                log.error { "Type $type does not have a SpawnConfig"}
+                log.error { "Type $type does not have a SpawnConfig" }
                 SpawnConfig(
                     AnimationModel.CHEST,
                     bodyType = BodyDef.BodyType.StaticBody,
@@ -110,17 +123,17 @@ class EntitySpawnSystem(
                 val spawnConfig = spawnConfig(type)
                 log.info { "Spawning an entity: $animationModel" }
                 it += ImageComponent().apply {
-                    image = Image().apply {
+                    image = FlipImage().apply {
                         setPosition(location.x, location.y)
                         setSize(relativeSize.x, relativeSize.y)
                         setScaling(com.badlogic.gdx.utils.Scaling.fill)
                     }
                 }
-                it += AnimationComponent().apply {
-                    nextAnimation(animationModel, AnimationType.IDLE)
+                it += AnimationComponent(model = animationModel).apply {
+                    nextAnimation(AnimationType.IDLE)
                 }
                 it += PhysicComponent().apply {
-                    body = PhysicComponent.createPhysicBody(
+                    body = createPhysicBody(
                         physicWorld,
                         it[ImageComponent].image,
                         spawnConfig
@@ -139,6 +152,22 @@ class EntitySpawnSystem(
                         speed = DEFAULT_SPEED * scaleSpeed
                     }
                 }
+
+                if (spawnConfig.canAttack) {
+                    it += AttackComponent(
+                        damage = (DEFAULT_ATTACK_DAMAGE * spawnConfig.scaleAttackDamage).roundToInt(),
+                        maxDelay = spawnConfig.attackDelay,
+                        extraRange = spawnConfig.attackExtraRange
+                    )
+                }
+
+                if (spawnConfig.lifeScale > 0) {
+                    it += LifeComponent(
+                        life = DEFAULT_LIFE * spawnConfig.lifeScale,
+                        max = DEFAULT_LIFE * spawnConfig.lifeScale
+                    )
+                }
+
                 if (type == "PLAYER") {
                     it += PlayerComponent()
                 }

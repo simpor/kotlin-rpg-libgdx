@@ -4,10 +4,11 @@ import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
+import se.simpor.actor.FlipImage
 
 
 class ImageComponent : Component<ImageComponent>, Comparable<ImageComponent> {
-    lateinit var image: Image
+    lateinit var image: FlipImage
 
     override fun type(): ComponentType<ImageComponent> = ImageComponent
 

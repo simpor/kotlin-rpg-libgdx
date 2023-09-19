@@ -12,6 +12,12 @@ data class SpawnConfig(
     val scalePhysic: Vector2 = vec2(1f, 1f),
     val physicOffset: Vector2 = vec2(0f, 0f),
     val bodyType: BodyDef.BodyType = BodyDef.BodyType.DynamicBody,
+    val attackDelay: Float = 0.2f,
+    val attackExtraRange: Float = 0f,
+    val lifeScale: Float = 1f,
+    val scaleSize: Float = 1f,
+    val canAttack: Boolean = true,
+    val scaleAttackDamage: Float = 1f,
 
     ) {
     companion object {
@@ -23,16 +29,6 @@ data class SpawnConfig(
 
 //data class SpawnCfg(
 //    val atlasKey: String,
-//    val scaleSize: Float = 1f,
-//    val scaleSpeed: Float = 1f,
-//    val canAttack: Boolean = true,
-//    val scaleAttackDamage: Float = 1f,
-//    val attackDelay: Float = 0.2f,
-//    val attackExtraRange: Float = 0f,
-//    val lifeScale: Float = 1f,
-//    val bodyType: BodyDef.BodyType = BodyDef.BodyType.DynamicBody,
-//    val scalePhysic: Vector2 = vec2(1f, 1f),
-//    val physicOffset: Vector2 = vec2(0f, 0f),
 //    val aiTreePath: String = "",
 //    val hasLight: Boolean = false,
 //    val categoryBit: Short = LightComponent.b2dEnvironment,

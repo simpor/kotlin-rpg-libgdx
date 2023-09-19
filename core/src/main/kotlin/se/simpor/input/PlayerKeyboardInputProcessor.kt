@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input.Keys.*
 import com.github.quillraven.fleks.World
 import ktx.app.KtxInputAdapter
+import se.simpor.component.AttackComponent
 import se.simpor.component.MoveComponent
 import se.simpor.component.PlayerComponent
 
@@ -33,8 +34,15 @@ class PlayerKeyboardInputProcessor(
                 RIGHT -> playerCos = 1f
                 LEFT -> playerCos = -1f
             }
+        } else if (keycode == SPACE) {
+            playerEntities.forEach {
+                it[AttackComponent].doAttack = true
+                it[AttackComponent].startAttack()
+            }
+
+            return true
         }
-        updatePlayerMovement()
+            updatePlayerMovement()
         return false
     }
 

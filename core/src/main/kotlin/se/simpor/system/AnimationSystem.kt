@@ -31,7 +31,7 @@ class AnimationSystem(
             animationComponent.nextAnimation = NO_ANIMATION
         }
 
-        animationComponent.animation.playMode = animationComponent.playMode
+        animationComponent.animation.playMode = animationComponent.mode
         entity[ImageComponent].image.drawable = animationComponent.animation.getKeyFrame(animationComponent.stateTime)
     }
 

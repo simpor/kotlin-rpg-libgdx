@@ -18,10 +18,14 @@ import ktx.box2d.loop
 import ktx.math.vec2
 import se.simpor.MysticWoodGame.Companion.UNIT_SCALE
 import se.simpor.system.CollisionSpawnSystem.Companion.SPAWN_AREA_SIZE
+import se.simpor.system.EntitySpawnSystem.Companion.HIT_BOX_SENSOR
 import com.badlogic.gdx.physics.box2d.World as PhysicWorld
 
-class PhysicComponent : Component<PhysicComponent> {
-    val impulse: Vector2 = vec2()
+class PhysicComponent(
+    val impulse: Vector2 = vec2(),
+    val size: Vector2 = vec2(),
+    val offset: Vector2 = vec2(),
+) : Component<PhysicComponent> {
     lateinit var body: Body
     val prevPos = vec2()
 
@@ -37,7 +41,7 @@ class PhysicComponent : Component<PhysicComponent> {
     }
 
     companion object : ComponentType<PhysicComponent>() {
-        fun createPhysicBody(physicWorld: PhysicWorld, image: Image, spawnConfig: SpawnConfig): Body {
+        fun PhysicComponent.createPhysicBody(physicWorld: PhysicWorld, image: Image, spawnConfig: SpawnConfig): Body {
             val x = image.x
             val y = image.y
             val width = image.width
@@ -45,16 +49,23 @@ class PhysicComponent : Component<PhysicComponent> {
             val bodyType = spawnConfig.bodyType
 
 
-            val w = width * spawnConfig.scalePhysic.x
-            val h = height * spawnConfig.scalePhysic.y
+            val cmp = this
+
 
             return physicWorld.body(bodyType) {
                 position.set(x + width * 0.5f, y + height * 0.5f)
                 fixedRotation = true
                 allowSleep = false
+                val w = width * spawnConfig.scalePhysic.x
+                val h = height * spawnConfig.scalePhysic.y
+
+                cmp.size.set(w, h)
+                cmp.offset.set(spawnConfig.physicOffset)
 
                 box(w, h, spawnConfig.physicOffset) {
-                    //   isSensor = bodyType != BodyDef.BodyType.StaticBody
+                    isSensor = bodyType != BodyDef.BodyType.StaticBody
+                    userData = HIT_BOX_SENSOR
+
                 }
 
                 if (bodyType != BodyDef.BodyType.StaticBody) {

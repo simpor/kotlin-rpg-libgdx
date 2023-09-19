@@ -14,9 +14,9 @@ class CollisionDespawnSystem(
     override fun onTickEntity(entity: Entity) {
         // for existing collision tiled entities we check if there are no nearby entities anymore
         // and remove them in that case
-        val tiledCmp = entity[TiledComponent]
-        if (tiledCmp.nearbyEntities.isEmpty()) {
-            stage.fire(CollisionDespawnEvent(tiledCmp.cell))
+        val tiledComponent = entity[TiledComponent]
+        if (tiledComponent.nearbyEntities.isEmpty()) {
+            stage.fire(CollisionDespawnEvent(tiledComponent.cell))
             entity.remove()
         }
     }

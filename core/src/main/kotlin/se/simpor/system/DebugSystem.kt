@@ -8,7 +8,9 @@ import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.github.quillraven.fleks.IntervalSystem
 import com.github.quillraven.fleks.World.Companion.inject
+import ktx.graphics.use
 import ktx.log.logger
+import se.simpor.system.AttackSystem.Companion.AABB_RECT
 
 class DebugSystem(
     private val physicWorld: World,
@@ -32,7 +34,13 @@ class DebugSystem(
             }
         )
         physicRenderer.render(physicWorld, camera.combined)
-
+        shapeRenderer.use(ShapeRenderer.ShapeType.Line, camera.combined) {
+            it.setColor(1f, 0f, 0f, 0f)
+            it.rect(AABB_RECT.x, AABB_RECT.y, AABB_RECT.width - AABB_RECT.x, AABB_RECT.height - AABB_RECT.y)
+//            it.setColor(1f, 1f, 0f, 0f)
+//            it.rect(TMP_RECT1.x, TMP_RECT1.y, TMP_RECT1.width, TMP_RECT1.height)
+//            it.rect(TMP_RECT2.x, TMP_RECT2.y, TMP_RECT2.width, TMP_RECT2.height)
+        }
     }
 
     override fun onDispose() {

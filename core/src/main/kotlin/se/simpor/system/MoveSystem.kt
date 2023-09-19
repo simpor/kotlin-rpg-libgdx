@@ -25,26 +25,32 @@ class MoveSystem : IteratingSystem(
 
     override fun onTickEntity(entity: Entity) {
         val physicComponent = entity[PhysicComponent]
-            val moveComponent = entity[MoveComponent]
+        val moveComponent = entity[MoveComponent]
+        val imageComponent = entity[ImageComponent]
 
-            val mass = physicComponent.body.mass
-            val (velX, velY) = physicComponent.body.linearVelocity
-            if ((moveComponent.cos == 0f && moveComponent.sin == 0f)) {
-                // no direction for movement or entity is rooted
-                if (!physicComponent.body.linearVelocity.isZero) {
-                    // entity is moving -> stop it
-                    val mass = physicComponent.body.mass
-                    val (velX, velY) = physicComponent.body.linearVelocity
-                    physicComponent.impulse.set(
-                        mass * (0f - velX),
-                        mass * (0f - velY)
-                    )
-                }
+        val mass = physicComponent.body.mass
+        val (velX, velY) = physicComponent.body.linearVelocity
+        if ((moveComponent.cos == 0f && moveComponent.sin == 0f)) {
+            // no direction for movement or entity is rooted
+            if (!physicComponent.body.linearVelocity.isZero) {
+                // entity is moving -> stop it
+                val mass = physicComponent.body.mass
+                val (velX, velY) = physicComponent.body.linearVelocity
+                physicComponent.impulse.set(
+                    mass * (0f - velX),
+                    mass * (0f - velY)
+                )
             }
-            physicComponent.impulse.set(
-                mass * (moveComponent.speed * moveComponent.cos - velX),
-                mass * (moveComponent.speed * moveComponent.sin - velY),
-            )
+        }
+        physicComponent.impulse.set(
+            mass * (moveComponent.speed * moveComponent.cos - velX),
+            mass * (moveComponent.speed * moveComponent.sin - velY),
+        )
+        entity.getOrNull(ImageComponent)?.let { imgCmp ->
+            if (moveComponent.cos != 0f) {
+                imgCmp.image.flipX = moveComponent.cos < 0
+            }
+        }
     }
 
     override fun handle(event: Event?): Boolean {
