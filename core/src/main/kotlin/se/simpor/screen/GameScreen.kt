@@ -66,7 +66,7 @@ class GameScreen : KtxScreen {
 
         entityWorld.systems.forEach { system -> if (system is EventListener) stage.addListener(system) }
 
-        currentMap = TmxMapLoader().load("maps/demo.tmx")
+        currentMap = TmxMapLoader().load("maps/demo-survival.tmx")
         stage.fire(MapChangedEvent(currentMap))
 
        PlayerKeyboardInputProcessor(world = entityWorld)
