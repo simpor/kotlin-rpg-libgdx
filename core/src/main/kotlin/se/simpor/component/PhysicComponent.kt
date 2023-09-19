@@ -13,9 +13,11 @@ import com.github.quillraven.fleks.World
 import ktx.app.gdxError
 import ktx.box2d.body
 import ktx.box2d.box
+import ktx.box2d.circle
 import ktx.box2d.loop
 import ktx.math.vec2
 import se.simpor.MysticWoodGame.Companion.UNIT_SCALE
+import se.simpor.system.CollisionSpawnSystem.Companion.SPAWN_AREA_SIZE
 import com.badlogic.gdx.physics.box2d.World as PhysicWorld
 
 class PhysicComponent : Component<PhysicComponent> {
@@ -91,7 +93,9 @@ class PhysicComponent : Component<PhysicComponent> {
 //                                filter.categoryBits = LightComponent.b2dEnvironment
 //                                this.isSensor = isPortal
                             }
-
+                            circle(SPAWN_AREA_SIZE + 2f) {
+                                isSensor = true
+                            }
 //                            if (!isPortal) {
 //                                TMP_VEC.set(bodyW * 0.5f, bodyH * 0.5f)
 //                                box(SPAWN_AREA_SIZE + 4f, SPAWN_AREA_SIZE + 4f, TMP_VEC) {

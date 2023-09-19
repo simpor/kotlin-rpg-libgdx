@@ -34,6 +34,7 @@ class GameScreen : KtxScreen {
         }
         systems {
             add(CollisionSpawnSystem(physicWorld))
+            add(CollisionDespawnSystem(stage))
             add(EntitySpawnSystem(textureAtlas, physicWorld))
             add(MoveSystem())
             add(PhysicSystem(physicWorld))

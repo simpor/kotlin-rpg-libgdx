@@ -11,7 +11,6 @@ class ImageComponent : Component<ImageComponent>, Comparable<ImageComponent> {
 
     override fun type(): ComponentType<ImageComponent> = ImageComponent
 
-
     companion object : ComponentType<ImageComponent>()
 
     override fun compareTo(other: ImageComponent): Int {

@@ -12,6 +12,4 @@ data class MoveComponent(
     override fun type() = MoveComponent
 
     companion object : ComponentType<MoveComponent>()
-
-
 }

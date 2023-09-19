@@ -22,6 +22,8 @@ import ktx.tiled.width
 import se.simpor.component.CollisionComponent
 import se.simpor.component.PhysicComponent
 import se.simpor.component.PhysicComponent.Companion.physicCmpFromShape2D
+import se.simpor.component.TiledComponent
+import se.simpor.event.CollisionDespawnEvent
 import se.simpor.event.MapChangedEvent
 
 class CollisionSpawnSystem(
@@ -68,13 +70,13 @@ class CollisionSpawnSystem(
                     world.entity {
                         it += physicCmpFromShape2D(physicWorld, x, y, mapObj.shape)
                         log.info { "Adding collision object" }
-//                        it += TiledComponent(tileCell).also { tiledCmp ->
+                        it += TiledComponent(tileCell).also { tiledCmp ->
                             // add entity immediately here, otherwise the newly created
                             // collision entity might get removed by the CollisionDespawnSystem because
                             // the physic collision event will come later in the PhysicSystem when
                             // the physic world gets updated
-//                            tiledCmp.nearbyEntities.add(entity)
-//                        }
+                            tiledCmp.nearbyEntities.add(entity)
+                        }
                     }
                 }
             }
@@ -105,16 +107,16 @@ class CollisionSpawnSystem(
                 }
             }
             return true
-//        } else if (event is CollisionDespawnEvent) {
-//            processedCells.remove(event.cell)
-//            return true
+        } else if (event is CollisionDespawnEvent) {
+            processedCells.remove(event.cell)
+            return true
         }
         return false
     }
 
     companion object {
         // increase from 1 to 7 to correctly throw Light shadows for objects
-        const val SPAWN_AREA_SIZE = 7
+        const val SPAWN_AREA_SIZE = 2
 
         private val log = logger<CollisionSpawnSystem>()
 

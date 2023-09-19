@@ -13,8 +13,10 @@ import ktx.app.gdxError
 import ktx.log.logger
 import ktx.math.component1
 import ktx.math.component2
+import se.simpor.component.CollisionComponent
 import se.simpor.component.ImageComponent
 import se.simpor.component.PhysicComponent
+import se.simpor.component.TiledComponent
 
 class PhysicSystem(
     private val physicWorld: World,
@@ -79,12 +81,54 @@ class PhysicSystem(
         return true
     }
 
-    override fun beginContact(contact: Contact?) {
+    private val Fixture.entity: Entity
+        get() = this.body.userData as Entity
 
+    private val Contact.isSensorA: Boolean
+        get() = this.fixtureA.isSensor
+
+    private val Contact.isSensorB: Boolean
+        get() = this.fixtureB.isSensor
+
+    override fun beginContact(contact: Contact) {
+        val entityA = contact.fixtureA.entity
+        val entityB = contact.fixtureB.entity
+
+        when {
+            // keep track of nearby entities for tiled collision entities.
+            // when there are no nearby entities then the collision object will be removed
+            entityA has TiledComponent && entityB has CollisionComponent && contact.isSensorA && !contact.isSensorB -> {
+                entityA[TiledComponent].nearbyEntities += entityB
+            }
+
+            entityB has TiledComponent && entityA has CollisionComponent && contact.isSensorB && !contact.isSensorA -> {
+                entityB[TiledComponent].nearbyEntities += entityA
+            }
+            // AI entities keep track of their nearby entities to have this information available
+            // for their behavior. E.g. a slime entity will attack a player if he comes close
+
+        }
     }
 
-    override fun endContact(contact: Contact?) {
+    override fun endContact(contact: Contact) {
+        val entityA = contact.fixtureA.entity
+        val entityB = contact.fixtureB.entity
 
+        // same as beginContact but we remove entities instead
+        // Note: we cannot add the collision component check in endContact because when an entity
+        // gets removed then it does not have any components anymore, but it might be part of the
+        // nearbyEntities set.
+        // -> simply remove entities all the time because the set will take care of correct removal calls
+        when {
+            entityA has TiledComponent && contact.isSensorA && !contact.isSensorB -> {
+                entityA[TiledComponent].nearbyEntities -= entityB
+            }
+
+            entityB has TiledComponent && contact.isSensorB && !contact.isSensorA -> {
+                entityB[TiledComponent].nearbyEntities -= entityA
+            }
+
+        }
     }
 
     private fun Fixture.isDynamicBody() = this.body.type == BodyDef.BodyType.DynamicBody
