@@ -10,7 +10,6 @@ import com.badlogic.gdx.scenes.scene2d.Stage
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
-import com.github.quillraven.fleks.World.Companion.inject
 import com.github.quillraven.fleks.collection.compareEntityBy
 import ktx.graphics.use
 import ktx.tiled.forEachLayer
@@ -18,7 +17,8 @@ import se.simpor.component.ImageComponent
 import se.simpor.event.MapChangedEvent
 
 class RenderSystem(
-    private val stage: Stage = inject()
+    private val gameStage: Stage,
+    private val uiStage: Stage
 ) : IteratingSystem(
     family { all(ImageComponent) },
     comparator = compareEntityBy(ImageComponent)
@@ -26,8 +26,8 @@ class RenderSystem(
 
     private val backgroundLayer = mutableListOf<TiledMapTileLayer>()
     private val foregroundLayer = mutableListOf<TiledMapTileLayer>()
-    private val mapRenderer = OrthogonalTiledMapRenderer(null, 1 / 16f, stage.batch)
-    private val ortCamera = stage.camera as OrthographicCamera
+    private val mapRenderer = OrthogonalTiledMapRenderer(null, 1 / 16f, gameStage.batch)
+    private val ortCamera = gameStage.camera as OrthographicCamera
 
     override fun onTickEntity(entity: Entity) {
         entity[ImageComponent].image.toFront()
@@ -36,12 +36,12 @@ class RenderSystem(
     override fun onTick() {
         super.onTick()
 
-        with(stage) {
+        with(gameStage) {
             viewport.apply()
             AnimatedTiledMapTile.updateAnimationBaseTime()
             mapRenderer.setView(ortCamera)
             if (backgroundLayer.isNotEmpty()) {
-                stage.batch.use(ortCamera.combined) {
+                gameStage.batch.use(ortCamera.combined) {
                     backgroundLayer.forEach { mapRenderer.renderTileLayer(it) }
                 }
             }
@@ -51,10 +51,16 @@ class RenderSystem(
             draw()
 
             if (foregroundLayer.isNotEmpty()) {
-                stage.batch.use(ortCamera.combined) {
+                gameStage.batch.use(ortCamera.combined) {
                     foregroundLayer.forEach { mapRenderer.renderTileLayer(it) }
                 }
             }
+        }
+
+        with(uiStage) {
+            viewport.apply()
+            act(deltaTime)
+            draw()
         }
     }
 

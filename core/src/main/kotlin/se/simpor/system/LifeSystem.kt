@@ -11,7 +11,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
-import com.github.quillraven.fleks.World.Companion.inject
 import ktx.assets.disposeSafely
 import ktx.math.vec2
 import se.simpor.component.*
@@ -21,6 +20,7 @@ import se.simpor.event.fire
 
 class LifeSystem(
     private val gameStage: Stage,
+    private val uiStage: Stage,
 ) : IteratingSystem(family { all(LifeComponent, PhysicComponent).none(DeadComponent) }) {
     private val damFont = BitmapFont(Gdx.files.internal("damage.fnt")).apply { data.setScale(0.33f) }
     private val damFntStyle = LabelStyle(damFont, Color.WHITE)
@@ -33,7 +33,7 @@ class LifeSystem(
             val physicCmp = entity[PhysicComponent]
             lifeCmp.life -= lifeCmp.takeDamage
             gameStage.fire(EntityTakeDamageEvent(entity, lifeCmp.takeDamage))
-           // damageFloatingText(lifeCmp.takeDamage, physicCmp.body.position, physicCmp.size)
+            damageFloatingText(lifeCmp.takeDamage, physicCmp.body.position, physicCmp.size)
             lifeCmp.takeDamage = 0f
         }
 
@@ -55,15 +55,16 @@ class LifeSystem(
         }
     }
 
-//    private fun damageFloatingText(damage: Float, entityPosition: Vector2, entitySize: Vector2) {
-//        world.entity {
-//            it += FloatingTextComponent(
-//                vec2(entityPosition.x, entityPosition.y - entitySize.y * 0.5f),
-//                1.5f,
-//                Label(damage.toInt().toString(), damFntStyle)
-//            )
-//        }
-//    }
+    private fun damageFloatingText(damage: Float, entityPosition: Vector2, entitySize: Vector2) {
+        world.entity {
+            it += FloatingTextComponent(
+                vec2(entityPosition.x, entityPosition.y - entitySize.y * 0.5f),
+                1.5f,
+                Label(damage.toInt().toString(), damFntStyle),
+                uiStage
+            )
+        }
+    }
 
     override fun onDispose() {
         damFont.disposeSafely()

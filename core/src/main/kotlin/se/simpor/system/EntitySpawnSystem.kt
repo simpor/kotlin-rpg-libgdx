@@ -71,7 +71,7 @@ class EntitySpawnSystem(
             "SLIME" -> SpawnConfig(
                 AnimationModel.SLIME,
                 scalePhysic = vec2(0.3f, 0.3f),
-                lifeScale = 0.75f,
+                lifeScale = 8.75f,
                 physicOffset = vec2(0f, -2f * UNIT_SCALE)
             )
 

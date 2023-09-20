@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.github.quillraven.fleks.World
 import com.github.quillraven.fleks.configureWorld
 import ktx.app.KtxScreen
+import ktx.assets.disposeSafely
 import ktx.box2d.createWorld
 import ktx.log.logger
 import ktx.math.vec2
@@ -19,7 +20,8 @@ import se.simpor.input.PlayerKeyboardInputProcessor
 import se.simpor.system.*
 
 class GameScreen : KtxScreen {
-    private val stage = Stage(ExtendViewport(16f, 9f))
+    private val gameStage = Stage(ExtendViewport(16f, 9f))
+    private val uiStage = Stage(ExtendViewport(320f, 180f))
     private val textureAtlas = TextureAtlas("graphics/game.atlas")
     private lateinit var currentMap: TiledMap
     private val physicWorld = createWorld(gravity = vec2()).apply {
@@ -28,33 +30,34 @@ class GameScreen : KtxScreen {
 
     private val entityWorld: World = configureWorld(entityCapacity = 1000) {
         injectables {
-            add(stage)
+            add(gameStage)
             add(textureAtlas)
             add(physicWorld)
         }
         systems {
             add(CollisionSpawnSystem(physicWorld))
-            add(CollisionDespawnSystem(stage))
+            add(CollisionDespawnSystem(gameStage))
             add(EntitySpawnSystem(textureAtlas, physicWorld))
             add(MoveSystem())
-            add(AttackSystem(physicWorld, stage))
-            add(LifeSystem(stage))
+            add(AttackSystem(physicWorld, gameStage))
+            add(LifeSystem(gameStage, uiStage))
             add(PhysicSystem(physicWorld))
-            add(CameraSystem(stage))
+            add(CameraSystem(gameStage))
             add(AnimationSystem())
-            add(RenderSystem())
-            add(DebugSystem(physicWorld, stage))
+            add(FloatingTextSystem(gameStage, uiStage))
+            add(RenderSystem(gameStage, uiStage))
+            add(DebugSystem(physicWorld, gameStage))
         }
 
         onAddEntity { entity ->
             if (entity has ImageComponent) {
-                stage.addActor(entity[ImageComponent].image)
+                gameStage.addActor(entity[ImageComponent].image)
             }
         }
 
         onRemoveEntity { entity ->
             if (entity has ImageComponent) {
-                stage.root.removeActor(entity[ImageComponent].image)
+                gameStage.root.removeActor(entity[ImageComponent].image)
             }
         }
 
@@ -64,16 +67,16 @@ class GameScreen : KtxScreen {
     override fun show() {
         log.debug { "GameScreen get shown" }
 
-        entityWorld.systems.forEach { system -> if (system is EventListener) stage.addListener(system) }
+        entityWorld.systems.forEach { system -> if (system is EventListener) gameStage.addListener(system) }
 
         currentMap = TmxMapLoader().load("maps/demo-survival.tmx")
-        stage.fire(MapChangedEvent(currentMap))
+        gameStage.fire(MapChangedEvent(currentMap))
 
        PlayerKeyboardInputProcessor(world = entityWorld)
     }
 
     override fun resize(width: Int, height: Int) {
-        with(stage) {
+        with(gameStage) {
             viewport.update(width, height, true)
         }
     }
@@ -83,10 +86,10 @@ class GameScreen : KtxScreen {
     }
 
     override fun dispose() {
-        stage.dispose()
-        textureAtlas.dispose()
+        gameStage.disposeSafely()
+        textureAtlas.disposeSafely()
         entityWorld.dispose()
-        currentMap.dispose()
+        currentMap.disposeSafely()
     }
 
     companion object {
